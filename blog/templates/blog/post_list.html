@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang = "ko">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
+    <meta chcarset="UTF-8">
     <title>Blog</title>
 </head>
 <body>
@@ -10,8 +10,8 @@
 {% for p in posts %}
 <hr/>
 <h2><a href="{{p.get_absolute_url}}">{{p.title}}</a></h2>
-<h4>{{ p.created_at }}</h4>
-<p>{{ p.content }}</p>
-{% endfor %}
+<h4>{{p.created}}</h4>
+<p>{{p.content}}</p>
+{% endif %}
 </body>
 </html>
