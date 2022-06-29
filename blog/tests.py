@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
 from .models import Post, Category, Tag
 
-# Create your tests here.
+
 class TestView(TestCase):
     def setUp(self):
         self.client = Client()
@@ -40,35 +40,6 @@ class TestView(TestCase):
         self.post_003.tags.add(self.tag_python_kor)
         self.post_003.tags.add(self.tag_python)
 
-    def test_category_page(self):
-        response = self.client.get(self.category_programming.get_absolute_url())
-        self.assertEqual(response.status_code, 200)
-
-        soup = BeautifulSoup(response.content, 'html.parser')
-        self.navbar_test(soup)
-        self.category_card_test(soup)
-
-        self.assertIn(self.category_programming.name, soup.h1.text)
-
-        main_area = soup.find('div', id='main-area')
-        self.assertIn(self.category_programming.name, main_area.text)
-        self.assertIn(self.post_001.title, main_area.text)
-        self.assertNotIn(self.post_002.title, main_area.text)
-        self.assertNotIn(self.post_003.title, main_area.text)
-
-    def category_card_test(self, soup):
-        categories_card = soup.find('div', id='categories-card')
-        self.assertIn('Categories', categories_card.text)
-        self.assertIn(
-            f'{self.category_programming.name} ({self.category_programming.post_set.count()})',
-            categories_card.text
-        )
-        self.assertIn(
-            f'{self.category_music.name} ({self.category_music.post_set.count()})',
-            categories_card.text
-        )
-        self.assertIn(f'미분류 (1)', categories_card.text)
-
     def navbar_test(self, soup):
         navbar = soup.nav
         self.assertIn('Blog', navbar.text)
@@ -86,6 +57,19 @@ class TestView(TestCase):
         about_me_btn = navbar.find('a', text='About Me')
         self.assertEqual(about_me_btn.attrs['href'], '/about_me/')
 
+    def category_card_test(self, soup):
+        categories_card = soup.find('div', id='categories-card')
+        self.assertIn('Categories', categories_card.text)
+        self.assertIn(
+            f'{self.category_programming.name} ({self.category_programming.post_set.count()})',
+            categories_card.text
+        )
+        self.assertIn(
+            f'{self.category_music.name} ({self.category_music.post_set.count()})',
+            categories_card.text
+        )
+        self.assertIn(f'미분류 (1)', categories_card.text)
+
     def test_post_list(self):
         # Post가 있는 경우
         self.assertEqual(Post.objects.count(), 3)
@@ -93,6 +77,8 @@ class TestView(TestCase):
         response = self.client.get('/blog/')
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.assertEqual(soup.title.text, 'Blog')
 
         self.navbar_test(soup)
         self.category_card_test(soup)
@@ -103,7 +89,7 @@ class TestView(TestCase):
         post_001_card = main_area.find('div', id='post-1')  # id가 post-1인 div를 찾아서, 그 안에
         self.assertIn(self.post_001.title, post_001_card.text)  # title이 있는지
         self.assertIn(self.post_001.category.name, post_001_card.text)  # category가 있는지
-        self.assertIn(self.post_001.author.username.upper(), post_001_card.text)
+        self.assertIn(self.post_001.author.username.upper(), post_001_card.text)  # 작성자명이 있는지
         self.assertIn(self.tag_hello.name, post_001_card.text)
         self.assertNotIn(self.tag_python.name, post_001_card.text)
         self.assertNotIn(self.tag_python_kor.name, post_001_card.text)
@@ -123,9 +109,6 @@ class TestView(TestCase):
         self.assertNotIn(self.tag_hello.name, post_003_card.text)
         self.assertIn(self.tag_python.name, post_003_card.text)
         self.assertIn(self.tag_python_kor.name, post_003_card.text)
-
-        self.assertIn(self.user_trump.username.upper(), main_area.text)
-        self.assertIn(self.user_obama.username.upper(), main_area.text)
 
         # Post가 없는 경우
         Post.objects.all().delete()
@@ -158,3 +141,35 @@ class TestView(TestCase):
         self.assertIn(self.tag_hello.name, post_area.text)
         self.assertNotIn(self.tag_python.name, post_area.text)
         self.assertNotIn(self.tag_python_kor.name, post_area.text)
+
+    def test_category_page(self):
+        response = self.client.get(self.category_programming.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+
+        self.assertIn(self.category_programming.name, soup.h1.text)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.category_programming.name, main_area.text)
+        self.assertIn(self.post_001.title, main_area.text)
+        self.assertNotIn(self.post_002.title, main_area.text)
+        self.assertNotIn(self.post_003.title, main_area.text)
+
+    def test_tag_page(self):
+        response = self.client.get(self.tag_hello.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+
+        self.assertIn(self.tag_hello.name, soup.h1.text)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.tag_hello.name, main_area.text)
+        self.assertIn(self.post_001.title, main_area.text)
+        self.assertNotIn(self.post_002.title, main_area.text)
+        self.assertNotIn(self.post_003.title, main_area.text)
