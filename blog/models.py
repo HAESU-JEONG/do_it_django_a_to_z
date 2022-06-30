@@ -14,6 +14,7 @@ class Tag(models.Model):
     def get_absolute_url(self):
         return f'/blog/category/{self.slug}/'
 
+
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -26,6 +27,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = 'Categories'
+
 
 class Post(models.Model):
     title = models.CharField(max_length=30)
